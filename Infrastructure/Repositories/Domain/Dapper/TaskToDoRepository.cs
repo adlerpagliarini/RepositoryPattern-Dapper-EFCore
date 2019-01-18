@@ -27,7 +27,7 @@ namespace Infrastructure.Repositories.Domain.Dapper
         protected override string UpdateByIdQuery => $"UPDATE [{nameof(TaskToDo)}] SET {nameof(TaskToDo.Title)} = @{nameof(TaskToDo.Title)}, {nameof(TaskToDo.Start)} = @{nameof(TaskToDo.Start)}, {nameof(TaskToDo.DeadLine)} = @{nameof(TaskToDo.DeadLine)}, {nameof(TaskToDo.Status)} = @{nameof(TaskToDo.Status)} WHERE {nameof(TaskToDo.Id)} = @{nameof(TaskToDo.Id)}";
         protected override string DeleteByIdQuery => $"DELETE FROM [{nameof(TaskToDo)}] WHERE {nameof(TaskToDo.Id)} = @{nameof(TaskToDo.Id)}";
         protected override string SelectAllQuery => $"SELECT * FROM [{nameof(TaskToDo)}]";
-        protected override string SelectByIdQuery => $"SELECT t.*, u.* FROM [{nameof(TaskToDo)}] t INNER JOIN [{nameof(User)}] u ON u.{nameof(User.Id)} = t.{nameof(TaskToDo.UserId)} AND t.{nameof(TaskToDo.Id)} = @{nameof(TaskToDo.Id)}";
+        protected override string SelectByIdQuery => $"SELECT t.* FROM [{nameof(TaskToDo)}] t WHERE t.{nameof(TaskToDo.Id)} = @{nameof(TaskToDo.Id)}";
 
         private string SelectAllIncludingRelation => $"SELECT t.*, u.* FROM [{nameof(TaskToDo)}] t INNER JOIN [{nameof(User)}] u ON u.{nameof(User.Id)} = t.{nameof(TaskToDo.UserId)}";
         private string SelectByIdIncludingRelation => $"SELECT t.*, u.* FROM [{nameof(TaskToDo)}] t INNER JOIN [{nameof(User)}] u ON u.{nameof(User.Id)} = t.{nameof(TaskToDo.UserId)} WHERE t.{nameof(TaskToDo.Id)} = @{nameof(TaskToDo.Id)}";
