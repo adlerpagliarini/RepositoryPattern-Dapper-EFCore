@@ -10,7 +10,10 @@
 - Repositórios genéricos e específicos com Entity Framework Core.
 - Testes integrados com utilização de transações
 
-# C# .Net Core - Criando uma aplicação utilizando Repository Pattern com dois ORMs diferentes Dapper e Entity Framework Core - Parte 3
+# <a href="https://medium.com/@adlerpagliarini/c-net-core-criando-uma-aplica%C3%A7%C3%A3o-utilizando-repository-pattern-com-dois-orms-diferentes-dapper-bf5373206ac">Parte 3</a>
 - Repositórios genéricos e específicos com Dapper.
 - Testes integrados com utilização de transações
+
+# <a href="https://medium.com/@adlerpagliarini/8a4157e88d61">Parte 4</a>
+- Camada de serviços e injeção de dependência.
 
