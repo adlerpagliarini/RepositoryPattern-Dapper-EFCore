@@ -21,4 +21,4 @@
 - Asp.Net Core Web Application
 
 #
-<img src="https://github.com/adlerpagliarini/RepositoryPattern-Dapper-EFCore/blob/master/screen.jpg" />
+<img src="https://github.com/adlerpagliarini/RepositoryPattern-Dapper-EFCore/blob/master/screen.JPG" />
