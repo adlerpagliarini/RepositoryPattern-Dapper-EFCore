@@ -9,8 +9,9 @@ namespace Infrastructure.DBConfiguration
         {
             get
             {
+                var path = $"{Directory.GetParent(Directory.GetCurrentDirectory()).ToString()}\\Infrastructure";
                 IConfigurationRoot Configuration = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .SetBasePath(path)
                     .AddJsonFile("appsettings.json")
                     .Build();
                 return Configuration;

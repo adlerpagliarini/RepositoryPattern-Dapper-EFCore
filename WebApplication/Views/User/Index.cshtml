@@ -1,0 +1,105 @@
+﻿@model IndexPageViewModel
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Index</h2>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Total users: @Model.Users.Count()
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Users)
+        {
+            string selectedRow = "";
+            if (item.Id == (int?)Model.UserId)
+            {
+                selectedRow = "success";
+            }
+            <tr class="@selectedRow">
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    <a asp-action="Index" asp-route-id="@item.Id">Load Tasks</a> |
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (Model.UserId != null)
+{
+    <h3>Tasks from Selected Users</h3>
+    <p>
+        @Html.ActionLink(linkText: "Create Task", actionName: "Create", controllerName: "TaskToDo",
+                     routeValues: new { userId = Model.UserId })
+    </p>
+    <table class="table">
+        <tr>
+            <th></th>
+            <th>#</th>
+            <th>Task</th>
+            <th>Start</th>
+            <th>Deadline</th>
+            <th>Completed</th>
+        </tr>
+
+        @foreach (var item in Model.TasksFromUser)
+        {
+            <tr>
+                <td>
+                    @{
+                        @Html.ActionLink(linkText: "Edit", actionName: "Edit", controllerName: "TaskToDo",
+                        routeValues: new { userId = item.UserId, id = item.Id })
+                        <span>|</span>
+                        @Html.ActionLink(linkText: "Delete", actionName: "Delete", controllerName: "TaskToDo",
+                        routeValues: new { userId = item.UserId, id = item.Id })
+                    }
+                </td>
+                <td>
+                    @item.Id
+                </td>
+                <td>
+                    @item.Title
+                </td>
+                <td>
+                    @item.Start
+                </td>
+                <td>
+                    @item.DeadLine
+                </td>
+                <td>
+                    @{
+                        if (!item.Status)
+                        {
+                            <form asp-action="Complete" asp-controller="TaskToDo">
+                                <input type="hidden" name="Id" value="@item.Id" />
+                                <input type="hidden" name="UserId" value="@item.UserId" />
+                                <input type="submit" value="Complete" class="btn btn-default" />
+                            </form>
+                        }
+                        else
+                        {
+                            <span>Done</span>
+                        }
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+}

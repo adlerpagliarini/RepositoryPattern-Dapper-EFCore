@@ -1,10 +1,5 @@
-﻿using Domain.Entities;
-using Infrastructure.Interfaces.Repositories.Standard;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infrastructure.IoC
 {
