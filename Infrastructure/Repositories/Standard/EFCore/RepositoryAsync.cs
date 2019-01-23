@@ -74,6 +74,12 @@ namespace Infrastructure.Repositories.Standard.EFCore
 
         public virtual async Task<int> UpdateAsync(TEntity obj)
         {
+            var avoidingAttachedEntity = await GetByIdAsync(obj.Id);
+            dbContext.Entry(avoidingAttachedEntity).State = EntityState.Detached;
+
+            var entry = dbContext.Entry(obj);
+            if (entry.State == EntityState.Detached) dbContext.Attach(obj);
+
             dbContext.Entry(obj).State = EntityState.Modified;
             return await CommitAsync();
         }
