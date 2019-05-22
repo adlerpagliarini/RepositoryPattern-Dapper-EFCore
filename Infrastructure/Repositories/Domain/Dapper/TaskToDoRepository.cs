@@ -22,8 +22,8 @@ namespace Infrastructure.Repositories.Domain.Dapper
         {
         }
 
-        protected override string InsertQuery => $"INSERT INTO [{nameof(TaskToDo)}] VALUES (@{nameof(TaskToDo.Title)}, @{nameof(TaskToDo.Start)}, @{nameof(TaskToDo.DeadLine)}, @{nameof(TaskToDo.Status)}, @{nameof(TaskToDo.UserId)})";
-        protected override string InsertQueryReturnInserted => $"INSERT INTO [{nameof(TaskToDo)}] OUTPUT INSERTED.* VALUES (@{nameof(TaskToDo.Title)}, @{nameof(TaskToDo.Start)}, @{nameof(TaskToDo.DeadLine)}, @{nameof(TaskToDo.Status)}, @{nameof(TaskToDo.UserId)})";
+        protected override string InsertQuery => $"INSERT INTO [{nameof(TaskToDo)}] VALUES (@{nameof(User.Id)}, @{nameof(TaskToDo.Title)}, @{nameof(TaskToDo.Start)}, @{nameof(TaskToDo.DeadLine)}, @{nameof(TaskToDo.Status)}, @{nameof(TaskToDo.UserId)})";
+        protected override string InsertQueryReturnInserted => $"INSERT INTO [{nameof(TaskToDo)}] OUTPUT INSERTED.* VALUES (@{nameof(User.Id)}, @{nameof(TaskToDo.Title)}, @{nameof(TaskToDo.Start)}, @{nameof(TaskToDo.DeadLine)}, @{nameof(TaskToDo.Status)}, @{nameof(TaskToDo.UserId)})";
         protected override string UpdateByIdQuery => $"UPDATE [{nameof(TaskToDo)}] SET {nameof(TaskToDo.Title)} = @{nameof(TaskToDo.Title)}, {nameof(TaskToDo.Start)} = @{nameof(TaskToDo.Start)}, {nameof(TaskToDo.DeadLine)} = @{nameof(TaskToDo.DeadLine)}, {nameof(TaskToDo.Status)} = @{nameof(TaskToDo.Status)} WHERE {nameof(TaskToDo.Id)} = @{nameof(TaskToDo.Id)}";
         protected override string DeleteByIdQuery => $"DELETE FROM [{nameof(TaskToDo)}] WHERE {nameof(TaskToDo.Id)} = @{nameof(TaskToDo.Id)}";
         protected override string SelectAllQuery => $"SELECT * FROM [{nameof(TaskToDo)}]";
@@ -40,7 +40,7 @@ namespace Infrastructure.Repositories.Domain.Dapper
             return queryResult.Distinct();
         }
 
-        public async Task<TaskToDo> GetByIdIncludingUserAsync(int id)
+        public async Task<TaskToDo> GetByIdIncludingUserAsync(Guid id)
         {
             var queryResult = await dbConn.QueryAsync<TaskToDo, User, TaskToDo>(SelectByIdIncludingRelation, param: new { Id = id }, transaction: dbTransaction,
                 map: (taskToDo, user) => FuncMapRelation(taskToDo, user));

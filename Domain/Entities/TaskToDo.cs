@@ -4,7 +4,7 @@ namespace Domain.Entities
 {
     public class TaskToDo : IIdentityEntity
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public string Title { get; set; }
 
@@ -14,7 +14,12 @@ namespace Domain.Entities
 
         public bool Status { get; set; }
 
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public virtual User User { get; set; }
+
+        public TaskToDo()
+        {
+            Id = Guid.NewGuid();
+        }
     }
 }

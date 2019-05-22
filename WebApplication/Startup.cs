@@ -22,9 +22,11 @@ namespace WebApplication
         public void ConfigureServices(IServiceCollection services)
         {
             services.ApplicationServicesIoC();
-            services.InfrastructureORM<EntityFrameworkIoC>();
+            //services.InfrastructureORM<EntityFrameworkIoC>();
             /* ou */
             //services.InfrastructureORM<DapperIoC>();
+            /* ou */
+            services.InfrastructureORM<MongoIoC>();
 
             services.Configure<CookiePolicyOptions>(options =>
             {

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Infrastructure.DBConfiguration.Mongo;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using System.IO;
 
@@ -15,6 +16,18 @@ namespace UnitTest.Integration.Repositories.DBConfiguration
                     .AddJsonFile("appsettings.test.json")
                     .Build();               
                 return Options.Create(Configuration.GetSection("ConnectionStrings").Get<DataOptionFactory>());        
+            }
+        }
+
+        public static IOptions<MongoSettings> MongoDBConfiguration
+        {
+            get
+            {
+                IConfigurationRoot Configuration = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.test.json")
+                    .Build();
+                return Options.Create(Configuration.GetSection("MongoDB").Get<MongoSettings>());
             }
         }
     }

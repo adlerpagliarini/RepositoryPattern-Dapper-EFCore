@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,7 +7,7 @@ namespace WebApplication.Models
 {
     public class IndexPageViewModel
     {
-        public int? UserId { get; set; }
+        public Guid? UserId { get; set; }
         public IEnumerable<User> Users { get; set; }
         public IEnumerable<TaskToDo> TasksFromUser { get; set; }
 
@@ -16,7 +17,7 @@ namespace WebApplication.Models
             TasksFromUser = new List<TaskToDo>();
         }
 
-        public IndexPageViewModel MapUsersToViewModel(int? id, IEnumerable<User> users)
+        public IndexPageViewModel MapUsersToViewModel(Guid? id, IEnumerable<User> users)
         {
             this.Users = users.ToList();
             this.UserId = id;

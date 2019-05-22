@@ -1,7 +1,9 @@
-﻿namespace Domain.Entities
+﻿using System;
+
+namespace Domain.Entities
 {
     public interface IIdentityEntity
     {
-        int Id { get; set; }
+        Guid Id { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using Application.Services.Standard;
 using Domain.Entities;
 using Infrastructure.Interfaces.Repositories.Domain;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -22,7 +23,7 @@ namespace Application.Services.Domain
             return await _repository.GetAllIncludingUserAsync();
         }
 
-        public async Task<TaskToDo> GetByIdIncludingUserAsync(int id)
+        public async Task<TaskToDo> GetByIdIncludingUserAsync(Guid id)
         {
             return await _repository.GetByIdIncludingUserAsync(id);
         }
@@ -33,7 +34,7 @@ namespace Application.Services.Domain
             obj.Status = taskToDo.Status;
             await base.UpdateAsync(obj);
         }
-        public async Task UpdateStatusAsync(int id, bool status)
+        public async Task UpdateStatusAsync(Guid id, bool status)
         {
             var taskToDo = await GetByIdAsync(id);
             taskToDo.Status = status;

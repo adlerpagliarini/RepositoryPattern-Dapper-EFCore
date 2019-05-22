@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Domain.Entities;
@@ -22,7 +23,7 @@ namespace Infrastructure.Repositories.Domain.EFCore
             return query.AsEnumerable();
         }
 
-        public async Task<TaskToDo> GetByIdIncludingUserAsync(int id)
+        public async Task<TaskToDo> GetByIdIncludingUserAsync(Guid id)
         {
             IQueryable<TaskToDo> query = await Task.FromResult(GenerateQuery((taskToDo => taskToDo.Id == id), null, nameof(TaskToDo.User)));
             return query.SingleOrDefault();

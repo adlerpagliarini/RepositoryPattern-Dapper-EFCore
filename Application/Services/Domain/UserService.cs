@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Interfaces.Services.Domain;
 using Application.Services.Standard;
@@ -22,7 +23,7 @@ namespace Application.Services.Domain
             return await _repository.GetAllIncludingTasksAsync();
         }
 
-        public async Task<User> GetByIdIncludingTasksAsync(int id)
+        public async Task<User> GetByIdIncludingTasksAsync(Guid id)
         {
             return await _repository.GetByIdIncludingTasksAsync(id);
         }

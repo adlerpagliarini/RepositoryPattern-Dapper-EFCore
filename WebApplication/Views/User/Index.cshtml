@@ -23,7 +23,7 @@
         @foreach (var item in Model.Users)
         {
             string selectedRow = "";
-            if (item.Id == (int?)Model.UserId)
+            if (item.Id == (Guid?)Model.UserId)
             {
                 selectedRow = "success";
             }

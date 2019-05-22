@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using Application.Interfaces.Services.Domain;
 using WebApplication.Models;
+using System;
 
 namespace WebApplication.Controllers
 {
@@ -17,7 +18,7 @@ namespace WebApplication.Controllers
         }
 
         // GET: User
-        public async Task<IActionResult> Index(int? id)
+        public async Task<IActionResult> Index(Guid? id)
         {
             var result = await _userService.GetAllIncludingTasksAsync();
             var viewModel = new IndexPageViewModel();
@@ -26,7 +27,7 @@ namespace WebApplication.Controllers
         }
 
         // GET: User/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
             {
@@ -62,7 +63,7 @@ namespace WebApplication.Controllers
         }
 
         // GET: User/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
             {
@@ -80,7 +81,7 @@ namespace WebApplication.Controllers
         // POST: User/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] User user)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Name")] User user)
         {
             if (id != user.Id)
             {
@@ -110,7 +111,7 @@ namespace WebApplication.Controllers
         }
 
         // GET: User/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
@@ -129,13 +130,13 @@ namespace WebApplication.Controllers
         // POST: User/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             await _userService.RemoveAsync(id);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool UserExists(int id)
+        private bool UserExists(Guid id)
         {
             return _userService.GetByIdAsync(id) != null ? true : false;
         }

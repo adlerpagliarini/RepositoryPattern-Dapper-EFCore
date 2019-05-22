@@ -45,7 +45,8 @@ namespace UnitTest.Integration.Repositories.Repositories.EntityFramework
         public async Task AddAsync()
         {
             var result = await userEntityFramework.AddAsync(builder.CreateUser());
-            Assert.Greater(result.Id, 0);
+            var found = await userEntityFramework.GetByIdAsync(result.Id);
+            Assert.IsNotNull(found);
         }
 
         [Test]
@@ -119,25 +120,19 @@ namespace UnitTest.Integration.Repositories.Repositories.EntityFramework
         [Test]
         public async Task GetAllAsync()
         {
-            var user1 = await userEntityFramework.AddAsync(builder.CreateUser());
-            var user2 = await userEntityFramework.AddAsync(builder.CreateUser());
+            var user = await userEntityFramework.AddAsync(builder.CreateUser());
             var result = await userEntityFramework.GetAllAsync();
-            Assert.AreEqual(result.OrderBy(u => u.Id).FirstOrDefault().Id, user1.Id);
-            Assert.AreEqual(result.OrderBy(u => u.Id).LastOrDefault().Id, user2.Id);
+            Assert.AreEqual(result.OrderBy(u => u.Id).FirstOrDefault().Id, user.Id);
         }
 
         [Test]
         public async Task GetAllIncludingTasksAsync()
         {
-            var user1 = await userEntityFramework.AddAsync(builder.CreateUserWithTasks(1));
-            var user2 = await userEntityFramework.AddAsync(builder.CreateUserWithTasks(2));
+            var user = await userEntityFramework.AddAsync(builder.CreateUserWithTasks(2));
             var result = await userEntityFramework.GetAllIncludingTasksAsync();
 
-            Assert.AreEqual(result.OrderBy(u => u.Id).FirstOrDefault().Id, user1.Id);
-            Assert.AreEqual(result.OrderBy(u => u.Id).LastOrDefault().Id, user2.Id);
-
-            Assert.AreEqual(result.OrderBy(u => u.Id).FirstOrDefault().TasksToDo.Count(), 1);
-            Assert.AreEqual(result.OrderBy(u => u.Id).LastOrDefault().TasksToDo.Count(), 2);
+            Assert.AreEqual(result.OrderBy(u => u.Id).FirstOrDefault().Id, user.Id);
+            Assert.AreEqual(result.OrderBy(u => u.Id).FirstOrDefault().TasksToDo.Count(), 2);
         }
 
         [Test]

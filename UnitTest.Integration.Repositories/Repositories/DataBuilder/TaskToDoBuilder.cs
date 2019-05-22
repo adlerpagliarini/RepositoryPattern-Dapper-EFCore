@@ -19,7 +19,7 @@ namespace UnitTest.Integration.Repositories.Repositories.DataBuilder
             return taskToDo;
         }
 
-        public TaskToDo CreateTaskToDoWithUser(int id)
+        public TaskToDo CreateTaskToDoWithUser(Guid id)
         {
             taskToDo = new TaskToDo() { Title = "Task from Builder", Start = DateTime.Now, DeadLine = DateTime.Now, UserId = id };
             return taskToDo;
@@ -36,7 +36,7 @@ namespace UnitTest.Integration.Repositories.Repositories.DataBuilder
             return taskToDoList;
         }
 
-        public List<TaskToDo> CreateTaskToDoListWithUser(int amount, int id)
+        public List<TaskToDo> CreateTaskToDoListWithUser(int amount, Guid id)
         {
             taskToDoList = new List<TaskToDo>();
             for (int i = 0; i < amount; i++)

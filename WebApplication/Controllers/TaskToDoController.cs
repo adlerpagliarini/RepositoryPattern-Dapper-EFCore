@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Domain.Entities;
 using Application.Interfaces.Services.Domain;
 using Microsoft.AspNetCore.Routing;
+using System;
 
 namespace WebApplication.Controllers
 {
@@ -16,7 +17,7 @@ namespace WebApplication.Controllers
         }
 
         // GET: TaskToDo/Create/{userId}
-        public IActionResult Create(int? userId)
+        public IActionResult Create(Guid? userId)
         {
             ViewData["UserId"] = userId;
             return View();
@@ -39,7 +40,7 @@ namespace WebApplication.Controllers
         }
 
         // GET: TaskToDo/Edit/{taskId}
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
             {
@@ -58,7 +59,7 @@ namespace WebApplication.Controllers
         // POST: TaskToDo/Edit/{taskId}
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Start,DeadLine,UserId")] TaskToDo taskToDo)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Title,Start,DeadLine,UserId")] TaskToDo taskToDo)
         {
             if (id != taskToDo.Id)
             {
@@ -77,7 +78,7 @@ namespace WebApplication.Controllers
         }
 
         // GET: TaskToDo/Delete/{taskId}
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
@@ -97,7 +98,7 @@ namespace WebApplication.Controllers
         // POST: TaskToDo/Delete/{taskId}/{userId}
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id, int userId)
+        public async Task<IActionResult> DeleteConfirmed(Guid id, Guid userId)
         {
             var taskToDo = await _taskToDoService.RemoveAsync(id);
             return RedirectToAction("Index",
@@ -108,7 +109,7 @@ namespace WebApplication.Controllers
         // POST: TaskToDo/Complete/{taskId}/{userId}
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Complete(int id, int userId)
+        public async Task<IActionResult> Complete(Guid id, Guid userId)
         {
             await _taskToDoService.UpdateStatusAsync(id, true);
             return RedirectToAction("Index",

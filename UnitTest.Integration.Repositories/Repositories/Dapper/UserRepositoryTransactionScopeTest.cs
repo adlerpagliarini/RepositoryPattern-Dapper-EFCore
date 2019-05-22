@@ -47,7 +47,8 @@ namespace UnitTest.Integration.Repositories.Repositories.Dapper
             {
                 userDapper = new UserRepository(databaseOptions);
                 var result = await userDapper.AddAsync(userBuilder.CreateUser());
-                Assert.Greater(result.Id, 0);
+                var found = await userDapper.GetByIdAsync(result.Id);
+                Assert.IsNotNull(found);
             }
         }
 
@@ -156,8 +157,12 @@ namespace UnitTest.Integration.Repositories.Repositories.Dapper
                 var user1 = await userDapper.AddAsync(userBuilder.CreateUser());
                 var user2 = await userDapper.AddAsync(userBuilder.CreateUser());
                 var result = await userDapper.GetAllAsync();
-                Assert.AreEqual(result.OrderBy(u => u.Id).FirstOrDefault().Id, user1.Id);
-                Assert.AreEqual(result.OrderBy(u => u.Id).LastOrDefault().Id, user2.Id);
+
+                var sortUsers = new List<User>() { user1, user2 };
+                sortUsers = sortUsers.OrderBy(u => u.Id).ToList();
+
+                Assert.AreEqual(result.OrderBy(u => u.Id).FirstOrDefault().Id, sortUsers.FirstOrDefault().Id);
+                Assert.AreEqual(result.OrderBy(u => u.Id).LastOrDefault().Id, sortUsers.LastOrDefault().Id);
             }
         }
 
@@ -170,20 +175,13 @@ namespace UnitTest.Integration.Repositories.Repositories.Dapper
                 userDapper = new UserRepository(conn);
                 taskToDoDapper = new TaskToDoRepository(conn);
 
-                var user1 = await userDapper.AddAsync(userBuilder.CreateUser());
-                var user2 = await userDapper.AddAsync(userBuilder.CreateUser());
-                var task1 = await taskToDoDapper.AddRangeAsync(taskToDoBuilder.CreateTaskToDoListWithUser(1, user1.Id));
-                var task2 = await taskToDoDapper.AddRangeAsync(taskToDoBuilder.CreateTaskToDoListWithUser(2, user2.Id));
+                var user = await userDapper.AddAsync(userBuilder.CreateUser());
+                var task = await taskToDoDapper.AddRangeAsync(taskToDoBuilder.CreateTaskToDoListWithUser(2, user.Id));
 
-                var result = await userDapper.GetAllIncludingTasksAsync();
-                var result1 = result.OrderBy(u => u.Id).FirstOrDefault();
-                var result2 = result.OrderBy(u => u.Id).LastOrDefault();
+                var result = (await userDapper.GetAllIncludingTasksAsync()).FirstOrDefault();
 
-                Assert.AreEqual(result1.Id, user1.Id);
-                Assert.AreEqual(result2.Id, user2.Id);
-
-                Assert.AreEqual(result1.TasksToDo.Count(), 1);
-                Assert.AreEqual(result2.TasksToDo.Count(), 2);
+                Assert.AreEqual(result.Id, user.Id);
+                Assert.AreEqual(result.TasksToDo.Count(), 2);
             }
         }
 

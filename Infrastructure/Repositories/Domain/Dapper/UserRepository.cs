@@ -22,8 +22,8 @@ namespace Infrastructure.Repositories.Domain.Dapper
         {
         }
 
-        protected override string InsertQuery => $"INSERT INTO [{nameof(User)}] VALUES (@{nameof(User.Name)})";
-        protected override string InsertQueryReturnInserted => $"INSERT INTO [{nameof(User)}] OUTPUT INSERTED.* VALUES (@{nameof(User.Name)})";
+        protected override string InsertQuery => $"INSERT INTO [{nameof(User)}] VALUES (@{nameof(User.Id)}, @{nameof(User.Name)})";
+        protected override string InsertQueryReturnInserted => $"INSERT INTO [{nameof(User)}] OUTPUT INSERTED.* VALUES (@{nameof(User.Id)}, @{nameof(User.Name)})";
         protected override string UpdateByIdQuery => $"UPDATE [{nameof(User)}] SET {nameof(User.Name)} = @{nameof(User.Name)} WHERE {nameof(User.Id)} = @{nameof(User.Id)}";
         protected override string DeleteByIdQuery => $"DELETE FROM [{nameof(User)}] WHERE {nameof(User.Id)} = @{nameof(User.Id)}";
         protected override string SelectAllQuery => $"SELECT * FROM [{nameof(User)}]";
@@ -34,23 +34,23 @@ namespace Infrastructure.Repositories.Domain.Dapper
 
         public async Task<IEnumerable<User>> GetAllIncludingTasksAsync()
         {
-            var userDictionary = new Dictionary<int, User>();
+            var userDictionary = new Dictionary<Guid, User>();
             var queryResult = await dbConn.QueryAsync<User, TaskToDo, User>(SelectAllIncludingRelation, transaction: dbTransaction,
                 map: (user, toDoList) => FuncMapRelation(user, toDoList, userDictionary));
 
             return queryResult.Distinct();
         }
 
-        public async Task<User> GetByIdIncludingTasksAsync(int id)
+        public async Task<User> GetByIdIncludingTasksAsync(Guid id)
         {
-            var userDictionary = new Dictionary<int, User>();
+            var userDictionary = new Dictionary<Guid, User>();
             var queryResult = await dbConn.QueryAsync<User, TaskToDo, User>(SelectByIdIncludingRelation, param: new { Id = id }, transaction: dbTransaction,
                 map: (user, toDoList) => FuncMapRelation(user, toDoList, userDictionary));
 
             return queryResult.Distinct().FirstOrDefault();
         }
 
-        private readonly Func<User, TaskToDo, Dictionary<int, User>, User> FuncMapRelation = (user, tasksToDo, userDictionary) =>
+        private readonly Func<User, TaskToDo, Dictionary<Guid, User>, User> FuncMapRelation = (user, tasksToDo, userDictionary) =>
         {
             if (!userDictionary.TryGetValue(user.Id, out User userEntry))
             {

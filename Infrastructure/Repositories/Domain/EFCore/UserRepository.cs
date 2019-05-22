@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Domain.Entities;
@@ -24,7 +25,7 @@ namespace Infrastructure.Repositories.Domain.EFCore
             return query.AsEnumerable();
         }
 
-        public async Task<User> GetByIdIncludingTasksAsync(int id)
+        public async Task<User> GetByIdIncludingTasksAsync(Guid id)
         {
             IQueryable<User> query = await Task.FromResult(GenerateQuery(filter: (user => user.Id == id),
                                                                          orderBy: null,
