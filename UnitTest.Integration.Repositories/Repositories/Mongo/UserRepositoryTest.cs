@@ -13,6 +13,7 @@ using System;
 using MongoDB.Driver;
 using Infrastructure.Interfaces.Repositories.Domain;
 using Infrastructure.Repositories.Domain.Mongo;
+using UnitTest.Integration.Repositories.DBConfiguration.Mongo;
 
 namespace UnitTest.Integration.Repositories.Repositories.Mongo
 {
@@ -21,14 +22,14 @@ namespace UnitTest.Integration.Repositories.Repositories.Mongo
     {
         private MongoContext dbContext;
 
-        private IMongoDomainRepository<User> userMongoRepository;
+        private IDomainRepository<User> userMongoRepository;
         private UserBuilder builder;
 
         [OneTimeSetUp]
         public void GlobalPrepare()
         {
-            dbContext = new MongoContext(DatabaseConnection.MongoDBConfiguration);
-            MongoContext.ConfigureClassMaps();
+            dbContext = new MongoConfiguration().DataBaseConfiguration();
+            MongoSetUpConfiguration.SetUpConfiguration();
         }
 
         [SetUp]
@@ -36,13 +37,13 @@ namespace UnitTest.Integration.Repositories.Repositories.Mongo
         {
             builder = new UserBuilder();
             userMongoRepository = new UserRepository(dbContext);
-            userMongoRepository.StartTransaction();
+            dbContext.StartTransaction();
         }
 
         [TearDown]
         public async Task ExecutadoAposExecucaoDeCadaTeste()
         {
-            await userMongoRepository.AbortTransactionAsync();
+            await dbContext.AbortTransactionAsync();
         }
 
         [Test]

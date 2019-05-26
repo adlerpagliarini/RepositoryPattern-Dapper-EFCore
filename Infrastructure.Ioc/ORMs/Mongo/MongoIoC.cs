@@ -1,6 +1,6 @@
 ﻿using Infrastructure.DBConfiguration.Mongo;
 using Infrastructure.Interfaces.Repositories.Domain;
-using Infrastructure.Interfaces.Repositories.Mongo;
+using Infrastructure.Interfaces.Repositories.Standard;
 using Infrastructure.Repositories.Domain.Mongo;
 using Infrastructure.Repositories.Standard.Mongo;
 using Microsoft.Extensions.Configuration;
@@ -20,10 +20,10 @@ namespace Infrastructure.IoC
 
             MongoContext.ConfigureClassMaps();
 
-            services.AddScoped(typeof(IMongoRepositoryAsync<>), typeof(RepositoryAsync<>));
+            services.AddScoped(typeof(IRepositoryAsync<>), typeof(RepositoryAsync<>));
             services.AddScoped<IUserRepository, UserRepository>();
 
-            //services.AddScoped<ITaskToDoRepository, TaskToDoRepository>();
+            services.AddScoped<ITaskToDoRepository, TaskToDoRepository>();
 
             return services;
         }

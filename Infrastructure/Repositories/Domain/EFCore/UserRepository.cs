@@ -12,9 +12,11 @@ namespace Infrastructure.Repositories.Domain.EFCore
     public class UserRepository : DomainRepository<User>,
                                   IUserRepository
     {
+        private readonly ApplicationContext _dbContext;
+
         public UserRepository(ApplicationContext dbContext) : base(dbContext)
         {
-
+            _dbContext = dbContext;
         }
 
         public async Task<IEnumerable<User>> GetAllIncludingTasksAsync()
@@ -32,5 +34,7 @@ namespace Infrastructure.Repositories.Domain.EFCore
                                                                          includeProperties: nameof(User.TasksToDo)));
             return query.SingleOrDefault();
         }
+
+        //public async Task<TaskToDo> GetTaskByIdAsync(Guid id) => await Task.FromResult(_dbContext.TaskToDo.Where(t => t.Id == id).SingleOrDefault());
     }
 }

@@ -1,16 +1,15 @@
-﻿using System;
+﻿using Domain.Entities;
+using Infrastructure.DBConfiguration.Mongo;
+using Infrastructure.Interfaces.Repositories.Standard;
+using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Domain.Entities;
-using Infrastructure.DBConfiguration.Mongo;
-using Infrastructure.Interfaces.Repositories.Mongo;
-using MongoDB.Bson;
-using MongoDB.Driver;
 
 namespace Infrastructure.Repositories.Standard.Mongo
 {
-    public class RepositoryAsync<TEntity> : IMongoRepositoryAsync<TEntity> where TEntity : class, IIdentityEntity
+    public class RepositoryAsync<TEntity> : IRepositoryAsync<TEntity> where TEntity : class, IIdentityEntity
     {
         protected readonly MongoContext dbContext;
         protected IClientSessionHandle mongoSession;
@@ -19,13 +18,13 @@ namespace Infrastructure.Repositories.Standard.Mongo
         protected RepositoryAsync(MongoContext mongoContext)
         {
             dbContext = mongoContext;
-            mongoSession = dbContext.MongoClient.StartSession();
+            mongoSession = mongoContext.MongoSession;
             dbSet = dbContext.GetCollection<TEntity>(typeof(TEntity).Name);
         }
 
         public async Task<TEntity> AddAsync(TEntity obj)
         {
-            await dbSet.InsertOneAsync(mongoSession, obj);       
+            await dbSet.InsertOneAsync(mongoSession, obj);
             return obj;
         }
 
@@ -56,14 +55,16 @@ namespace Infrastructure.Repositories.Standard.Mongo
 
         public async Task<int> UpdateRangeAsync(IEnumerable<TEntity> entities)
         {
-            int count = 0;
-            foreach (var entity in entities)
+            var updates = new List<WriteModel<TEntity>>();
+            entities.All(entity =>
             {
                 var filter = new FilterDefinitionBuilder<TEntity>().Eq(e => e.Id, entity.Id);
-                var result = await dbSet.FindOneAndReplaceAsync(mongoSession, filter, entity);
-                count = result.Id == entity.Id ? count + 1 : count;
-            }
-            return count;
+                updates.Add(new ReplaceOneModel<TEntity>(filter, entity));
+                return true;
+            });
+
+            var result = await dbSet.BulkWriteAsync(mongoSession, updates);
+            return (int) result.ModifiedCount;
         }
 
         public async Task<bool> RemoveAsync(object id)
@@ -76,39 +77,18 @@ namespace Infrastructure.Repositories.Standard.Mongo
         public async Task<int> RemoveAsync(TEntity obj)
         {
             var deletedResult = await dbSet.DeleteOneAsync(mongoSession, e => e.Id == obj.Id);
-            return (int) deletedResult.DeletedCount;
+            return (int)deletedResult.DeletedCount;
         }
 
         public async Task<int> RemoveRangeAsync(IEnumerable<TEntity> entities)
         {
-            int deletedCount = 0;
-            foreach (var entity in entities)
-            {
-                var deletedEntity = await dbSet.DeleteOneAsync(mongoSession, Builders<TEntity>.Filter.Eq("Id", entity.Id));
-                deletedCount += (int) deletedEntity.DeletedCount;
-            }
-            return deletedCount;
-        }
-
-        public void StartTransaction()
-        {
-            mongoSession.StartTransaction();
-        }
-
-        public async Task AbortTransactionAsync()
-        {
-            await mongoSession.AbortTransactionAsync();
-        }
-
-        public async Task CommitTransactionAsync()
-        {
-            await mongoSession.CommitTransactionAsync();
+            var deletedEntitiesResult = await dbSet.DeleteManyAsync(mongoSession, Builders<TEntity>.Filter.In("Id", entities.Select(e => e.Id)));
+            return (int) deletedEntitiesResult.DeletedCount;
         }
 
         public void Dispose()
         {
             GC.SuppressFinalize(this);
-            mongoSession.Dispose();
         }
     }
 }

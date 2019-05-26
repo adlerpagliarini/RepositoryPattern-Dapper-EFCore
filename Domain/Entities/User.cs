@@ -1,5 +1,4 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -23,14 +22,24 @@ namespace Domain.Entities
 
         public void AddItemToDo(TaskToDo todo)
         {
+            todo.UserId = Id;
             _tasksToDo.Add(todo);
         }
 
         public static class UserFactory
         {
-            public static User NewUserFactory(ICollection<TaskToDo> tasksToDo)
+            public static User NewUserFactory(Guid id, ICollection<TaskToDo> tasksToDo)
             {
-                return new User() { _tasksToDo = tasksToDo };
+                var tasks = new Collection<TaskToDo>();
+
+                tasksToDo.All(task =>
+                {
+                    task.UserId = id;
+                    tasks.Add(task);
+                    return true;
+                });
+
+                return new User { Id = id, _tasksToDo = tasks };
             }
         }
     }
