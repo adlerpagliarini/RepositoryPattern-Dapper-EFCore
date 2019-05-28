@@ -2,17 +2,14 @@
 using Infrastructure.DBConfiguration.Mongo;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UnitTest.Integration.Repositories.DBConfiguration.Mongo
 {
-    public class MongoConfiguration
+    public static class MongoConfiguration
     {
-        private IServiceProvider _provider;
+        private static IServiceProvider _provider;
 
-        public MongoContext DataBaseConfiguration()
+        public static MongoContext DataBaseConfiguration()
         {
             var services = new ServiceCollection();
             services.AddTransient(_ => new MongoContext(DatabaseConnection.MongoDBConfiguration));
@@ -34,8 +31,8 @@ namespace UnitTest.Integration.Repositories.DBConfiguration.Mongo
                     if (instance == false)
                     {
                         instance = true;
-                        MongoContext.ConfigureClassMaps();
-                        var mongoContext = new MongoConfiguration().DataBaseConfiguration();
+                        MongoSettings.ConfigureMongoConventions();
+                        var mongoContext = MongoConfiguration.DataBaseConfiguration();
                         mongoContext.MongoDatabase.DropCollection(nameof(User));
                         mongoContext.MongoDatabase.CreateCollection(nameof(User));
                     }

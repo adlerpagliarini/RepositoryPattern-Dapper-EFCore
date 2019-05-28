@@ -1,12 +1,7 @@
-﻿using Domain.Entities;
-using Infrastructure.Interfaces.Repositories.Standard;
+﻿using Infrastructure.Interfaces.Repositories.Standard;
 using Microsoft.Extensions.Options;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using System;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Infrastructure.DBConfiguration.Mongo
@@ -30,34 +25,7 @@ namespace Infrastructure.DBConfiguration.Mongo
         {
             MongoClient = new MongoClient(connectionString);
             MongoDatabase = MongoClient.GetDatabase(database);
-            MongoSession = MongoClient.StartSession();            
-            RegisterConventions();
-        }
-
-        private void RegisterConventions()
-        {
-            MongoDefaults.GuidRepresentation = GuidRepresentation.Standard;
-        }
-
-        public static void ConfigureClassMaps()
-        {
-            BsonClassMap.RegisterClassMap<User>(map =>
-            {
-                map.AutoMap();
-                map.MapCreator(x => User.UserFactory.NewUserFactory(x.Id, x.TasksToDo.ToArray()));
-                map.MapIdMember(x => x.Id);
-                map.MapMember(x => x.Name).SetIsRequired(true);
-                //map.SetIgnoreExtraElements(true);
-                map.MapMember(x => x.TasksToDo).SetElementName(nameof(TaskToDo));
-            });
-
-            BsonClassMap.RegisterClassMap<TaskToDo>(map =>
-            {
-                map.AutoMap();
-                //map.UnmapMember(x => x.Id);
-                map.UnmapMember(x => x.User);
-                map.UnmapMember(x => x.UserId);
-            });
+            MongoSession = MongoClient.StartSession();
         }
 
         public void StartTransaction()

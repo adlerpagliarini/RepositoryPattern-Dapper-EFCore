@@ -1,10 +1,7 @@
 ﻿using Domain.Entities;
 using Infrastructure.DBConfiguration.Mongo;
 using Infrastructure.Interfaces.Repositories.Domain;
-using Infrastructure.Interfaces.Repositories.Standard;
 using Infrastructure.Repositories.Standard.Mongo;
-using MongoDB.Bson;
-using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

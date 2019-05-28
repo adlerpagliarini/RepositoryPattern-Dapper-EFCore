@@ -1,12 +1,9 @@
-﻿using Infrastructure.Interfaces.Repositories.Domain;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System.Threading.Tasks;
 using UnitTest.Integration.Repositories.Repositories.DataBuilder;
 using System.Linq;
 using Infrastructure.DBConfiguration.Mongo;
-using UnitTest.Integration.Repositories.DBConfiguration;
 using Infrastructure.Repositories.Domain.Mongo;
-using System;
 using System.Collections.Generic;
 using Domain.Entities;
 using UnitTest.Integration.Repositories.DBConfiguration.Mongo;
@@ -27,7 +24,7 @@ namespace UnitTest.Integration.Repositories.Repositories.Mongo
         [OneTimeSetUp]
         public void GlobalPrepare()
         {
-            dbContext = new MongoConfiguration().DataBaseConfiguration();
+            dbContext = MongoConfiguration.DataBaseConfiguration();
             MongoSetUpConfiguration.SetUpConfiguration();
         }
 
@@ -53,8 +50,9 @@ namespace UnitTest.Integration.Repositories.Repositories.Mongo
             var user = userBuilder.CreateUser();
             var taskToDo = taskToDoBuilder.CreateTaskToDoWithUser(user.Id);
             var inserted = await userMongoRepository.AddAsync(user);
-            var result = await taskToDoMongoRepository.AddAsync(taskToDo);
-            Assert.AreEqual(taskToDo.Id, result.Id);
+            await taskToDoMongoRepository.AddAsync(taskToDo);
+            var result = await userMongoRepository.GetByIdAsync(user.Id);
+            Assert.AreEqual(1, result.TasksToDo.Count());
         }
 
         [Test]
@@ -63,21 +61,44 @@ namespace UnitTest.Integration.Repositories.Repositories.Mongo
             var user = userBuilder.CreateUser();
             var taskToDo = taskToDoBuilder.CreateTaskToDoListWithUser(3, user.Id);
             var inserted = await userMongoRepository.AddAsync(user);
-            var result = await taskToDoMongoRepository.AddRangeAsync(taskToDo);
-            Assert.AreEqual(3, result);
+            await taskToDoMongoRepository.AddRangeAsync(taskToDo);
+            var result = await userMongoRepository.GetByIdAsync(user.Id);
+            Assert.AreEqual(3, result.TasksToDo.Count());
         }
 
         [Test]
         public async Task UpdateAsync()
         {
-            var user = userBuilder.CreateUserWithTasks(1);
+            var user = userBuilder.CreateUserWithTasks(2);
             var inserted = await userMongoRepository.AddAsync(user);
 
-            var taskToDo = user.TasksToDo.FirstOrDefault();
-            taskToDo.Title = "update";
-            var result = await taskToDoMongoRepository.UpdateAsync(taskToDo);
+            var taskToDo1 = user.TasksToDo.FirstOrDefault();
+            taskToDo1.Title = "update 1";
 
-            Assert.IsTrue(result == 1);
+            await taskToDoMongoRepository.UpdateAsync(taskToDo1);
+
+            var foundTheFirst = await taskToDoMongoRepository.GetByIdAsync(taskToDo1.Id);
+
+            Assert.IsNotNull(foundTheFirst);
+        }
+
+        [Test]
+        public async Task UpdateAsync_Twice()
+        {
+            var user = userBuilder.CreateUserWithTasks(2);
+            var inserted = await userMongoRepository.AddAsync(user);
+
+            var taskToDo1 = user.TasksToDo.FirstOrDefault();
+            taskToDo1.Title = "update 1";
+            var taskToDo2 = user.TasksToDo.LastOrDefault();
+            taskToDo2.Title = "update 2";
+
+            await taskToDoMongoRepository.UpdateAsync(taskToDo1);
+            await taskToDoMongoRepository.UpdateAsync(taskToDo2);
+
+            var foundTheFirst = await taskToDoMongoRepository.GetByIdAsync(taskToDo1.Id);
+
+            Assert.IsNotNull(foundTheFirst);
         }
 
         [Test]
@@ -93,17 +114,55 @@ namespace UnitTest.Integration.Repositories.Repositories.Mongo
 
             var tasks = new List<TaskToDo>() { taskToDo1, taskToDo2 };
             var result = await taskToDoMongoRepository.UpdateRangeAsync(tasks);
-
+            
             var t1 = (await userMongoRepository.GetByIdAsync(user.Id)).TasksToDo.FirstOrDefault().Title;
             var t2 = (await userMongoRepository.GetByIdAsync(user.Id)).TasksToDo.LastOrDefault().Title;
-
+            
             Assert.IsTrue(t1 == "update1");
             Assert.IsTrue(t2 == "update2");
-            Assert.IsTrue(result == 1);
+
+            Assert.IsTrue(result == 2);
+        }
+
+        [Test]
+        public async Task UpdateRangeAsync_Twice()
+        {
+            var user = userBuilder.CreateUserWithTasks(1);
+            var inserted = await userMongoRepository.AddAsync(user);
+            await taskToDoMongoRepository.UpdateRangeAsync(user.TasksToDo);
+            var tasks = taskToDoBuilder.CreateTaskToDoListWithUser(2, user.Id);
+            await taskToDoMongoRepository.AddRangeAsync(tasks);
+            await taskToDoMongoRepository.UpdateRangeAsync(tasks);
+
+            var result = await taskToDoMongoRepository.GetByIdAsync(user.TasksToDo.FirstOrDefault().Id);
+            
+            Assert.IsNotNull(result);
         }
 
         [Test]
         public async Task RemoveAsync()
+        {
+            var user = userBuilder.CreateUser();
+            var tasksToDo = taskToDoBuilder.CreateTaskToDoListWithUser(3, user.Id);
+            var inserted = await userMongoRepository.AddAsync(user);
+            var deleteTaskTodo = taskToDoBuilder.CreateTaskToDoWithUser(user.Id);
+            deleteTaskTodo.Title = "Deletar";
+            tasksToDo.Add(deleteTaskTodo);
+            await taskToDoMongoRepository.AddRangeAsync(tasksToDo);
+
+            var tempUser = await userMongoRepository.GetByIdAsync(user.Id);
+            Assert.IsNotNull(tempUser.TasksToDo.Where(t => t.Title == "Deletar").FirstOrDefault());
+
+            var result = await taskToDoMongoRepository.RemoveAsync(deleteTaskTodo.Id);
+            tempUser = await userMongoRepository.GetByIdAsync(user.Id);
+            Assert.IsNull(tempUser.TasksToDo.Where(t => t.Title == "Deletar").FirstOrDefault());
+
+            Assert.IsTrue(tempUser.TasksToDo.Count() == 3);
+            Assert.IsTrue(result);
+        }
+
+        [Test]
+        public async Task RemoveAsyncObj()
         {
             var user = userBuilder.CreateUser();
             var tasksToDo = taskToDoBuilder.CreateTaskToDoListWithUser(3, user.Id);

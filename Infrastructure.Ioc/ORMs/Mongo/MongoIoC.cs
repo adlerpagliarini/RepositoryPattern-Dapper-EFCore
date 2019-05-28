@@ -18,7 +18,7 @@ namespace Infrastructure.IoC
             services.Configure<MongoSettings>(mongoSettings);
             services.AddScoped<MongoContext>();
 
-            MongoContext.ConfigureClassMaps();
+            MongoSettings.ConfigureMongoConventions();
 
             services.AddScoped(typeof(IRepositoryAsync<>), typeof(RepositoryAsync<>));
             services.AddScoped<IUserRepository, UserRepository>();

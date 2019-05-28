@@ -1,17 +1,14 @@
 ﻿using Domain.Entities;
-using Microsoft.EntityFrameworkCore.Storage;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnitTest.Integration.Repositories.Repositories.DataBuilder;
 using System.Linq;
 using Infrastructure.DBConfiguration.Mongo;
-using Infrastructure.Repositories.Standard.Mongo;
 using Infrastructure.Interfaces.Repositories.Domain.Standard;
 using UnitTest.Integration.Repositories.DBConfiguration;
 using System;
 using MongoDB.Driver;
-using Infrastructure.Interfaces.Repositories.Domain;
 using Infrastructure.Repositories.Domain.Mongo;
 using UnitTest.Integration.Repositories.DBConfiguration.Mongo;
 
@@ -28,7 +25,7 @@ namespace UnitTest.Integration.Repositories.Repositories.Mongo
         [OneTimeSetUp]
         public void GlobalPrepare()
         {
-            dbContext = new MongoConfiguration().DataBaseConfiguration();
+            dbContext = MongoConfiguration.DataBaseConfiguration();
             MongoSetUpConfiguration.SetUpConfiguration();
         }
 
