@@ -22,38 +22,38 @@ namespace Infrastructure.Repositories.Standard.Mongo
             dbSet = dbContext.GetCollection<TEntity>(typeof(TEntity).Name);
         }
 
-        public async Task<TEntity> AddAsync(TEntity obj)
+        public virtual async Task<TEntity> AddAsync(TEntity obj)
         {
             await dbSet.InsertOneAsync(mongoSession, obj);
             return obj;
         }
 
-        public async Task<int> AddRangeAsync(IEnumerable<TEntity> entities)
+        public virtual async Task<int> AddRangeAsync(IEnumerable<TEntity> entities)
         {
             await dbSet.InsertManyAsync(mongoSession, entities);
             return entities.Count();
         }
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync()
+        public virtual async Task<IEnumerable<TEntity>> GetAllAsync()
         {
             var result = await dbSet.FindAsync(mongoSession, e => true);
             return await result.ToListAsync();
         }
 
-        public async Task<TEntity> GetByIdAsync(object id)
+        public virtual async Task<TEntity> GetByIdAsync(object id)
         {
             var result = await dbSet.FindAsync(mongoSession, e => e.Id == ((Guid)id));
             return result.FirstOrDefault();
         }
 
-        public async Task<int> UpdateAsync(TEntity obj)
+        public virtual async Task<int> UpdateAsync(TEntity obj)
         {
             var filter = new FilterDefinitionBuilder<TEntity>().Eq(e => e.Id, obj.Id);
             var result = await dbSet.FindOneAndReplaceAsync(mongoSession, filter, obj);
             return result.Id == obj.Id ? 1 : 0;
         }
 
-        public async Task<int> UpdateRangeAsync(IEnumerable<TEntity> entities)
+        public virtual async Task<int> UpdateRangeAsync(IEnumerable<TEntity> entities)
         {
             var updates = new List<WriteModel<TEntity>>();
             entities.All(entity =>
@@ -67,20 +67,20 @@ namespace Infrastructure.Repositories.Standard.Mongo
             return (int) result.ModifiedCount;
         }
 
-        public async Task<bool> RemoveAsync(object id)
+        public virtual async Task<bool> RemoveAsync(object id)
         {
             var filter = new FilterDefinitionBuilder<TEntity>().Eq(e => e.Id, ((Guid)id));
             var deletedResult = await dbSet.DeleteOneAsync(mongoSession, filter);
             return deletedResult.DeletedCount > 0 ? true : false;
         }
 
-        public async Task<int> RemoveAsync(TEntity obj)
+        public virtual async Task<int> RemoveAsync(TEntity obj)
         {
             var deletedResult = await dbSet.DeleteOneAsync(mongoSession, e => e.Id == obj.Id);
             return (int)deletedResult.DeletedCount;
         }
 
-        public async Task<int> RemoveRangeAsync(IEnumerable<TEntity> entities)
+        public virtual async Task<int> RemoveRangeAsync(IEnumerable<TEntity> entities)
         {
             var deletedEntitiesResult = await dbSet.DeleteManyAsync(mongoSession, Builders<TEntity>.Filter.In("Id", entities.Select(e => e.Id)));
             return (int) deletedEntitiesResult.DeletedCount;

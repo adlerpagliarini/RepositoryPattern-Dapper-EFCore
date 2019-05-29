@@ -5,6 +5,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Infrastructure.DBConfiguration.Mongo
@@ -27,8 +28,8 @@ namespace Infrastructure.DBConfiguration.Mongo
                 map.MapCreator(x => User.UserFactory.NewUserFactory(x.Id, x.TasksToDo.ToArray()));
                 map.MapIdMember(x => x.Id);
                 map.MapMember(x => x.Name).SetIsRequired(true);
-                map.MapMember(x => x.TasksToDo).SetElementName(nameof(TaskToDo));
-                map.SetIgnoreExtraElements(true);
+                map.MapMember(x => x.TasksToDo).SetElementName(nameof(TaskToDo)).SetDefaultValue(new Collection<TaskToDo>());
+                //map.SetIgnoreExtraElements(true);
             });
 
             BsonClassMap.RegisterClassMap<TaskToDo>(map =>
