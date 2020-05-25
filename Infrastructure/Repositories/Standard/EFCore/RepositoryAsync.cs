@@ -90,6 +90,31 @@ namespace Infrastructure.Repositories.Standard.EFCore
             return await CommitAsync();
         }
 
+        public async Task<IReadOnlyList<TEntity>> ApplySpecification(ISpecification<TEntity> spec)
+        {
+            return await Specification(spec).ToListAsync();
+        }
+
+        private IQueryable<TEntity> Specification(ISpecification<TEntity> spec)
+        {
+            // Wont load includes
+            // return SpecificationEvaluator<TEntity>.GetQuery(dbSet.AsQueryable(), spec);
+            return EfSpecificationEvaluator<TEntity>.GetQuery(dbSet, spec);
+        }
+
+        public async Task<IReadOnlyList<TResult>> ApplySpecification<TResult>(ISpecification<TEntity, TResult> spec)
+        {
+            if (spec is null) throw new ArgumentNullException("spec is required");
+            if (spec.Selector is null) throw new Exception("Specification must have Selector defined.");
+
+            return await Specification(spec).ToListAsync();
+        }
+
+        private IQueryable<TResult> Specification<TResult>(ISpecification<TEntity, TResult> spec)
+        {
+            return EfSpecificationEvaluator<TEntity, TResult>.GetQuery(dbSet, spec);
+        }
+
         private async Task<int> CommitAsync()
         {
             return await dbContext.SaveChangesAsync();

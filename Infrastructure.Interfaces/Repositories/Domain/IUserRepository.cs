@@ -10,4 +10,10 @@ namespace Infrastructure.Interfaces.Repositories.Domain
         Task<IEnumerable<User>> GetAllIncludingTasksAsync();
         Task<User> GetByIdIncludingTasksAsync(int id);
     }
+
+    public interface IUserSpecificationRepository : IUserRepository
+    {
+        Task<IEnumerable<User>> GetAllIncludingTasksBySpecAsync();
+        Task<User> GetByIdIncludingTasksBySpecAsync(int id);
+    }
 }

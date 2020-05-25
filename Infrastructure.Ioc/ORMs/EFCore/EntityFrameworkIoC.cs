@@ -19,6 +19,7 @@ namespace Infrastructure.IoC
 
             services.AddScoped(typeof(IRepositoryAsync<>), typeof(RepositoryAsync<>));
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUserSpecificationRepository, UserRepository>();
             services.AddScoped<ITaskToDoRepository, TaskToDoRepository>();
 
             return services;

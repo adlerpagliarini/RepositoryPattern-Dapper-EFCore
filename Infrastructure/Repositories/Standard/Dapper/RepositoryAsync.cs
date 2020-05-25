@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Dapper;
 using Domain.Entities;
 using Infrastructure.Interfaces.DBConfiguration;
+using Infrastructure.Interfaces.Repositories.EFCore;
 using Infrastructure.Interfaces.Repositories.Standard;
 
 namespace Infrastructure.Repositories.Standard.Dapper
@@ -93,6 +95,16 @@ namespace Infrastructure.Repositories.Standard.Dapper
         public virtual async Task<int> UpdateRangeAsync(IEnumerable<TEntity> entities)
         {
             return await dbConn.ExecuteAsync(UpdateByIdQuery, entities.Select(obj => obj), transaction: dbTransaction);
+        }
+
+        public async Task<IReadOnlyList<TEntity>> ApplySpecification(ISpecification<TEntity> spec)
+        {
+            return SpecificationEvaluator<TEntity>.GetQuery((await GetAllAsync()).AsQueryable(), spec).ToList();
+        }
+
+        public Task<IReadOnlyList<TResult>> ApplySpecification<TResult>(ISpecification<TEntity, TResult> spec)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -19,5 +19,8 @@ namespace Infrastructure.Interfaces.Repositories.Standard
         Task<bool> RemoveAsync(object id);
         Task<int> RemoveAsync(TEntity obj);
         Task<int> RemoveRangeAsync(IEnumerable<TEntity> entities);
+
+        Task<IReadOnlyList<TEntity>> ApplySpecification(ISpecification<TEntity> spec);
+        Task<IReadOnlyList<TResult>> ApplySpecification<TResult>(ISpecification<TEntity, TResult> spec);
     }
 }

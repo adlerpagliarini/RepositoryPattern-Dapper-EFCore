@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using UnitTest.Integration.Repositories.DBConfiguration.EFCore;
 using UnitTest.Integration.Repositories.Repositories.DataBuilder;
 using System.Linq;
+using Infrastructure.Repositories.Domain.EFCore.Specifications;
 
 namespace UnitTest.Integration.Repositories.Repositories.EntityFramework
 {
@@ -18,7 +19,7 @@ namespace UnitTest.Integration.Repositories.Repositories.EntityFramework
         private ApplicationContext dbContext;
         private IDbContextTransaction transaction;
 
-        private IUserRepository userEntityFramework;
+        private IUserSpecificationRepository userEntityFramework;
         private UserBuilder builder;
 
         [OneTimeSetUp]
@@ -141,6 +142,35 @@ namespace UnitTest.Integration.Repositories.Repositories.EntityFramework
         }
 
         [Test]
+        public async Task GetAllIncludingTasksSpecificationAsync()
+        {
+            // Arrange
+            var _dbContext = new EntityFrameworkConnection().DataBaseConfiguration();
+            var _userEntityFramework = new UserRepository(_dbContext);
+            var _builder = new UserBuilder();
+            var _transaction = _dbContext.Database.BeginTransaction();
+
+            var user1 = await _userEntityFramework.AddAsync(_builder.CreateUserWithTasks(1));
+            var user2 = await _userEntityFramework.AddAsync(_builder.CreateUserWithTasks(2));
+
+            await _dbContext.SaveChangesAsync();
+
+            _transaction.Commit();
+
+            var result = await userEntityFramework.GetAllIncludingTasksBySpecAsync();
+
+            _dbContext.User.Remove(user1);
+            _dbContext.User.Remove(user2);
+            await _dbContext.SaveChangesAsync();
+
+            Assert.AreEqual(result.OrderBy(u => u.Id).FirstOrDefault().Id, user1.Id);
+            Assert.AreEqual(result.OrderBy(u => u.Id).LastOrDefault().Id, user2.Id);
+
+            Assert.AreEqual(result.OrderBy(u => u.Id).FirstOrDefault().TasksToDo.Count(), 1);
+            Assert.AreEqual(result.OrderBy(u => u.Id).LastOrDefault().TasksToDo.Count(), 2);
+        }
+
+        [Test]
         public async Task GetByIdIncludingTasksAsync()
         {
             var user = await userEntityFramework.AddAsync(builder.CreateUserWithTasks(3));
@@ -149,6 +179,60 @@ namespace UnitTest.Integration.Repositories.Repositories.EntityFramework
             Assert.AreEqual(result.Id, user.Id);
 
             Assert.AreEqual(result.TasksToDo.Count(), 3);
+        }
+
+        [Test]
+        public async Task GetByIdIncludingTasksSpecificationAsync()
+        {
+            var user = await userEntityFramework.AddAsync(builder.CreateUserWithTasks(3));
+            var result = await userEntityFramework.GetByIdIncludingTasksBySpecAsync(user.Id);
+
+            Assert.AreEqual(result.Id, user.Id);
+
+            Assert.AreEqual(result.TasksToDo.Count(), 3);
+        }
+
+        [Test]
+        public async Task GetById_UserByIdIncludingTasksSpec()
+        {
+            var user = await userEntityFramework.AddAsync(builder.CreateUserWithTasks(3));
+            var result = (await userEntityFramework.ApplySpecification(new UserByIdIncludingTasksSpec(user.Id, user.Name))).FirstOrDefault();
+
+            Assert.AreEqual(result.Id, user.Id);
+
+            Assert.AreEqual(result.TasksToDo.Count(), 3);
+        }
+
+        [Test]
+        public async Task GetById_UserIdAndNameByIdSpec()
+        {
+            var _dbContext = new EntityFrameworkConnection().DataBaseConfiguration();
+            var _userEntityFramework = new UserRepository(_dbContext);
+            var _builder = new UserBuilder();
+            var _transaction = _dbContext.Database.BeginTransaction();
+
+            var user = await _userEntityFramework.AddAsync(_builder.CreateUserWithTasks(1));
+
+            await _dbContext.SaveChangesAsync();
+
+            _transaction.Commit();
+
+            var result = (await userEntityFramework.ApplySpecification(new UserIdAndNameByIdSpec(user.Id))).FirstOrDefault();
+
+            _dbContext.User.Remove(user);
+            await _dbContext.SaveChangesAsync();
+
+            Assert.AreEqual(result.Id, user.Id);
+            Assert.AreEqual(result.Name, user.Name);
+        }
+
+        [Test]
+        public async Task GetById_UserNameByIdSpec()
+        {
+            var user = await userEntityFramework.AddAsync(builder.CreateUserWithTasks(3));
+            var result = (await userEntityFramework.ApplySpecification(new UserNameByIdSpec(user.Id))).FirstOrDefault();
+
+            Assert.AreEqual(result, user.Name);            
         }
     }
 }
