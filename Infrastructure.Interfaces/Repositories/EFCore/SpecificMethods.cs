@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace Infrastructure.Interfaces.Repositories.EFCore
 {
@@ -14,6 +15,12 @@ namespace Infrastructure.Interfaces.Repositories.EFCore
                                                 params string[] includeProperties);
 
         protected abstract IEnumerable<TEntity> GetYieldManipulated(IEnumerable<TEntity> entities, Func<TEntity, TEntity> DoAction);
+
+        public abstract Task<int> UpdateTrackedAsync(TEntity obj);
+
+        public abstract Task<int> UpdateRelatedAsync(TEntity obj);
+
+        public abstract void DetachTracked(object obj);
         #endregion ProtectedMethods
     }
 }

@@ -2,6 +2,7 @@
 using Infrastructure.Interfaces.Repositories.EFCore;
 using Infrastructure.Interfaces.Repositories.Standard;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -158,6 +159,39 @@ namespace Infrastructure.Repositories.Standard.EFCore
                 yield return DoAction(e);
             }
             yield break;
+        }
+
+        public override async Task<int> UpdateTrackedAsync(TEntity obj)
+        {
+            var avoidingAttachedEntity = await GetByIdAsync(obj.Id);
+            DetachTracked(avoidingAttachedEntity);
+            dbContext.Update(obj);
+            return await CommitAsync();
+        }
+
+        public override async Task<int> UpdateRelatedAsync(TEntity obj)
+        {
+            dbContext.Attach(obj);
+            var unchangedEntities = dbContext.ChangeTracker.Entries().Where(e => e.State == EntityState.Unchanged);
+
+            foreach (EntityEntry ee in unchangedEntities)
+                ee.State = EntityState.Modified;
+
+            return await CommitAsync();
+        }
+
+        public override void DetachTracked(object obj)
+        {
+            foreach(var entry in dbContext.Entry(obj).Navigations)
+            {
+                if (entry is ReferenceEntry && entry.CurrentValue is object entityObject)
+                    dbContext.Entry(entityObject).State = EntityState.Detached;
+
+                if (entry is CollectionEntry && entry.CurrentValue is IEnumerable<object> relatedCollection)
+                    foreach (var collection in relatedCollection)
+                        DetachTracked(collection);
+            }
+            dbContext.Entry(obj).State = EntityState.Detached;
         }
         #endregion ProtectedMethods
     }
